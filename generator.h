@@ -19,10 +19,13 @@ private:
 
 	int getDegrees(int x, int y, int base);
 
+	
+
 public:
 	int wid, hei, dx[8], dy[8], len, maxi;
 	int* board;
 	int way[201] = { 0, };
+	int known = -1;
 	vector<int> startPoint;
 	puzzle() : wid(0), hei(0) {
 
@@ -79,7 +82,7 @@ public:
 	friend ifstream& operator>> (ifstream &in, puzzle &board) {
 		int m, n, input;
 
-		in >> m >> n;
+		in >> n >> m;
 
 		board = puzzle(m, n);
 
@@ -93,12 +96,13 @@ public:
 			}
 		}
 
+		
 
 		return in;
 	}
 
 	friend ofstream& operator<<(ofstream &out, puzzle &board) {
-		out << board.wid << " " << board.hei << endl;
+		out << board.hei << " " << board.wid << endl;
 
 		int c = 0;
 		for (int i = 0; i < board.len; i++) {
@@ -135,10 +139,11 @@ bool puzzle::search(int x, int y, int w) // w찾을값, x,y=(w-1)의 좌표값
 
 	vector<int> nei = getNext(x, y);
 
-	for (int d = 0; d < nei.size(); d++)
-	{
-		int a = x + dx[nei[d]], b = y + dy[nei[d]];
-		
+	if (known == -1) {
+		for (int d = 0; d < nei.size(); d++)
+		{
+			int a = x + dx[nei[d]], b = y + dy[nei[d]];
+
 			if (board[a + b * wid] == 0)
 			{
 				board[a + b * wid] = w; // w-1의 이웃중 하나에 w를 넣고
@@ -148,6 +153,35 @@ bool puzzle::search(int x, int y, int w) // w찾을값, x,y=(w-1)의 좌표값
 				if (search(a, b, w + 1)) return true; // 다음찾을 값을 recursive하게부름
 				board[a + b * wid] = 0; // 답이 아닐경우 backtracking
 			}
+		}
+	}
+
+	else {
+		if (w != known) {
+			for (int d = 0; d < nei.size(); d++)
+			{
+				int a = x + dx[nei[d]], b = y + dy[nei[d]];
+
+				if (board[a + b * wid] == 0)
+				{
+					board[a + b * wid] = w; // w-1의 이웃중 하나에 w를 넣고
+											//cout << "val : " << board[a + b * wid] << " ";
+					way[w - 1] = a + b * wid;
+					if (w == maxi) return true;
+					if (search(a, b, w + 1)) return true; // 다음찾을 값을 recursive하게부름
+					board[a + b * wid] = 0; // 답이 아닐경우 backtracking
+				}
+			}
+		}
+		else {
+			for (int d = 0; d < nei.size(); d++)
+			{
+				int a = x + dx[nei[d]], b = y + dy[nei[d]];
+
+				if (board[a + b * wid] == known)
+					return true;
+			}
+		}
 	}
 	return false;
 }
@@ -174,12 +208,28 @@ void puzzle::findStart(int& x, int& y) // 퍼즐에서 랜덤한곳을 시작점 1로잡음
 		return;
 	}
 
-	if (startPoint.size() > 0) {
+	if (startPoint.size() == 1) {
 		board[startPoint[0]] = 1;
 		x = startPoint[0] % wid;
 		y = startPoint[0] / wid;
 		way[0] = startPoint[0];
 		return;
+	}
+	else if (startPoint.size() == 2) {
+		if (startPoint[0] % wid < startPoint[1] % wid) {
+			board[startPoint[0]] = 1;
+			x = startPoint[0] % wid;
+			y = startPoint[0] / wid;
+			way[0] = startPoint[0];
+			return;
+		}
+		else {
+			board[startPoint[1]] = 1;
+			x = startPoint[1] % wid;
+			y = startPoint[1] / wid;
+			way[0] = startPoint[1];
+			return;
+		}
 	}
 
 	x = 0;
