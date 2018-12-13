@@ -139,7 +139,7 @@ bool puzzle::search(int x, int y, int w) // w찾을값, x,y=(w-1)의 좌표값
 
 	vector<int> nei = getNext(x, y);
 
-	if (known == -1) {
+	
 		for (int d = 0; d < nei.size(); d++)
 		{
 			int a = x + dx[nei[d]], b = y + dy[nei[d]];
@@ -154,35 +154,7 @@ bool puzzle::search(int x, int y, int w) // w찾을값, x,y=(w-1)의 좌표값
 				board[a + b * wid] = 0; // 답이 아닐경우 backtracking
 			}
 		}
-	}
-
-	else {
-		if (w != known) {
-			for (int d = 0; d < nei.size(); d++)
-			{
-				int a = x + dx[nei[d]], b = y + dy[nei[d]];
-
-				if (board[a + b * wid] == 0)
-				{
-					board[a + b * wid] = w; // w-1의 이웃중 하나에 w를 넣고
-											//cout << "val : " << board[a + b * wid] << " ";
-					way[w - 1] = a + b * wid;
-					if (w == maxi) return true;
-					if (search(a, b, w + 1)) return true; // 다음찾을 값을 recursive하게부름
-					board[a + b * wid] = 0; // 답이 아닐경우 backtracking
-				}
-			}
-		}
-		else {
-			for (int d = 0; d < nei.size(); d++)
-			{
-				int a = x + dx[nei[d]], b = y + dy[nei[d]];
-
-				if (board[a + b * wid] == known)
-					return true;
-			}
-		}
-	}
+	
 	return false;
 }
 
